@@ -1,47 +1,51 @@
-def arithmetic_arranger(problems, answer = False):
+def arithmetic_arranger(problems, answer=False):
     if len(problems) > 5:
-            return "Error: Too many problems."
-    
+        return "Error: Too many problems."
+
     MARGIN_SPACE = "    "
+    SINGLE_SPACE = " "
+    SEPARATOR_CHAR = "-"
+
     first_operands, second_operands, operators = [], [], []
     first_line, second_line, third_line, fourth_line = [], [], [], []
 
     for problem in problems:
-        elements = problem.split()
-        first_operands.append(elements[0])
-        operators.append(elements[1])
-        second_operands.append(elements[2])
+        [first, operator, second] = problem.split(' ')
+        first_operands.append(first)
+        operators.append(operator)
+        second_operands.append(second)
 
+    for i in range(len(operators)):
+        if not (first_operands[i].isdigit() and second_operands[i].isdigit()):
+            return "Error: Numbers must only contain digits."
+        if len(first_operands[i]) > 4 or len(second_operands[i]) > 4:
+            return "Error: Numbers cannot be more than four digits."
+        if not ("+" in operators[i] or "-" in operators[i]):
+            return "Error: Operator must be \'+\' or \'-\'."
 
-    for i in range(len(first_operands)):
-        if not (first_operands[i].isdigit() and second_operands[i].isdigit()): return "Error: Numbers must only contain digits."
-        if len(first_operands[i]) > 4 or len(second_operands[i]) > 4: return "Error: Numbers cannot be more than four digits."
-        if "+" in operators or "-" in operators: continue 
-        else:
-            return "Error: operators must be '+' or '-'."
-            
-    #return(first_operands, operators, second_operands)
-            
-    # build 1st - 3rd
-    for i in range(len(first_operands)):
-        if len(first_operands[i]) > len(second_operands[i]):    first_line.append(" " * 2 + first_operands[i])
-        else:
-            first_line.append(" " * (len(second_operands[i]) - len(first_operands[i]) + 2) + first_operands[i])
-        if len(second_operands[i]) > len(first_operands[i]):    second_line.append(operators[i] + " " + second_operands[i])
-        else:
-            second_line.append(operators[i] + " " * (len(first_operands[i]) - len(second_operands[i]) + 1) + second_operands[i])
-        third_line.append("-" * (max(len(first_operands[i]), len(second_operands[i])) + 2))
+        ans = str(eval(first_operands[i] + operators[i] + second_operands[i]))
 
-    # build 4th
-    for i in range(len(first_operands)):
-        ans = eval(first_operands[i] + operators[i] + second_operands[i])
-        answer = str(ans)
-        if len(answer) > max(len(first_operands), len(second_operands)): fourth_line.append(" " + answer)
-        else: 
-            fourth_line.append(" " * max(len(first_operands[i]), len(second_operands[i]) - len(answer) + 2) + answer)
+        len_1 = len(first_operands[i])
+        len_2 = len(second_operands[i])
+        len_3 = len(ans)
 
-        arranged_problems = MARGIN_SPACE.join(first_line) + "\n" + MARGIN_SPACE.join(second_line) + "\n" + MARGIN_SPACE.join(third_line) + "\n" + MARGIN_SPACE.join(fourth_line)
-    else:
-        arranged_problems = MARGIN_SPACE.join(first_line) + "\n" + MARGIN_SPACE.join(second_line) + "\n" + MARGIN_SPACE.join(third_line) + "\n" + " ".join(fourth_line)
-        
-    return arranged_problems
+        repeat_1 = 2 if len_1 > len_2 else ((len_2 - len_1) + 2)
+        repeat_2 = ((len_1 - len_2) if len_1 > len_2 else 0) + 1
+        repeat_3 = max((len_1 + repeat_1), (len_2 + repeat_2 + 1))
+        repeat_4 = repeat_3 - len_3
+
+        first_line.append(SINGLE_SPACE * repeat_1 + first_operands[i])
+        second_line.append(operators[i] + SINGLE_SPACE * repeat_2 + second_operands[i])
+        third_line.append(SEPARATOR_CHAR * repeat_3)
+        fourth_line.append(SINGLE_SPACE * repeat_4 + ans)
+
+    return MARGIN_SPACE.join(first_line) + \
+        "\n" + MARGIN_SPACE.join(second_line) + \
+        "\n" + MARGIN_SPACE.join(third_line) + \
+        "{}".format(answer and "\n" + MARGIN_SPACE.join(fourth_line) or "")
+
+if __name__ == '__main__':
+    print(arithmetic_arranger(['3801 - 2', '123 + 49']) + '\n')
+    print(arithmetic_arranger(['1 + 2', '1 - 9380']) + '\n')
+    print(arithmetic_arranger(['3 + 855', '3801 - 2', '45 + 43', '123 + 49']) + '\n')
+    print(arithmetic_arranger(['11 + 4', '3801 - 2999', '1 + 2', '123 + 49', '1 - 9380']))
